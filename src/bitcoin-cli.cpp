@@ -439,6 +439,8 @@ private:
             return " regtest";
         case ChainType::MAIN:
             return "";
+        case ChainType::POOLTEST:
+            return " pooltest";
         }
         assert(false);
     }
