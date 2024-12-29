@@ -9,7 +9,7 @@ To Build
 
 ```bash
 cmake -B build
-cmake --build build    # use "-j N" for N parallel jobs
+cmake --build build -j 12    # use "-j N" for N parallel jobs
 cmake --install build  # optional
 ```
 
