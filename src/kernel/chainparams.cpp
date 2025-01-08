@@ -792,7 +792,7 @@ public:
         consensus.CSVHeight = 1;
         consensus.SegwitHeight = 0;
         consensus.MinBIP9WarningHeight = 0;
-        consensus.powLimit = uint256{"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
+        consensus.powLimit = uint256{"00000000ffff0000000000000000000000000000000000000000000000000000"};
         consensus.nPowTargetTimespan = 20;
         consensus.nPowTargetSpacing = 20;
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -823,12 +823,18 @@ public:
         m_assumed_blockchain_size = 0;
         m_assumed_chain_state_size = 0;
 
-        //genesis = CreateGenesisBlock(1296688602, 3, 0x207fffff, 1, 50 * COIN); 
-        //consensus.hashGenesisBlock = genesis.GetHash();
-        //assert(consensus.hashGenesisBlock == uint256{"5b7a4494ac602f4ddfbd5fbd180a5d670978b765d487c3680a50f5c03572f600"});
-        //assert(genesis.hashMerkleRoot == uint256{"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"});
+        genesis = CreateGenesisBlock(1296688602, 414098458, 0x1d00ffff, 1, 50 * COIN); 
+        consensus.hashGenesisBlock = genesis.GetHash();
+        assert(consensus.hashGenesisBlock == uint256{"000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"});
+        assert(genesis.hashMerkleRoot == uint256{"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"});
 
-        genesis = MineGenesisBlock(1296688602, 0, 0x1d00ffff, 1, 50 * COIN);
+        /* genesis = MineGenesisBlock(1296688602, 0, 0x1d00ffff, 1, 50 * COIN);
+        Genesis block found!
+        nonce: 414098458
+        time: 1296688602
+        hash: 000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943
+        merkle: 4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b */
+
 
         vFixedSeeds.clear();
         vSeeds.clear();
