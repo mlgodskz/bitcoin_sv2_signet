@@ -26,6 +26,14 @@
 #include <cstring>
 #include <type_traits>
 
+#include <arith_uint256.h>
+#include <uint256.h>
+#include <chainparams.h>
+#include <consensus/merkle.h>
+#include <primitives/block.h>
+#include <primitives/transaction.h>
+#include <util/strencodings.h>
+
 using namespace util::hex_literals;
 
 // Workaround MSVC bug triggering C7595 when calling consteval constructors in
@@ -718,6 +726,58 @@ std::optional<ChainType> GetNetworkForMagic(const MessageStartChars& message)
  */
 class CPoolTestParams : public CChainParams
 {
+
+private:
+    CBlock MineGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
+    {
+        const char* pszTimestamp = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
+        CMutableTransaction txNew;
+        txNew.version = 1;  // Изменено с nVersion на version
+        txNew.vin.resize(1);
+        txNew.vout.resize(1);
+        txNew.vin[0].scriptSig = CScript() << 486604799 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+        txNew.vout[0].nValue = genesisReward;
+        txNew.vout[0].scriptPubKey = CScript() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
+
+        CBlock genesis;
+        genesis.nTime    = nTime;
+        genesis.nBits    = nBits;
+        genesis.nNonce   = nNonce;
+        genesis.nVersion = nVersion;
+        genesis.vtx.push_back(MakeTransactionRef(std::move(txNew)));
+        genesis.hashPrevBlock.SetNull();
+        genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
+
+        // Майним блок
+        arith_uint256 bnTarget;
+        bnTarget.SetCompact(genesis.nBits);
+        
+        printf("Mining genesis block...\n");
+        printf("Target: %s\n", bnTarget.GetHex().c_str());
+        
+        while (UintToArith256(genesis.GetHash()) > bnTarget)
+        {
+            ++genesis.nNonce;
+            if (genesis.nNonce == 0)
+            {
+                printf("NONCE WRAPPED, incrementing time\n");
+                ++genesis.nTime;
+            }
+            if (genesis.nNonce % 10000 == 0)
+            {
+                printf("nonce: %u hash: %s\n", genesis.nNonce, genesis.GetHash().ToString().c_str());
+            }
+        }
+        
+        printf("\nGenesis block found!\n");
+        printf("nonce: %u\n", genesis.nNonce);
+        printf("time: %u\n", genesis.nTime);
+        printf("hash: %s\n", genesis.GetHash().ToString().c_str());
+        printf("merkle: %s\n", genesis.hashMerkleRoot.ToString().c_str());
+        
+        return genesis;
+    }
+
 public:
     CPoolTestParams()
     {
@@ -763,11 +823,12 @@ public:
         m_assumed_blockchain_size = 0;
         m_assumed_chain_state_size = 0;
 
-        genesis = CreateGenesisBlock(1296688602, 3, 0x207fffff, 1, 50 * COIN); 
-        consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256{"5b7a4494ac602f4ddfbd5fbd180a5d670978b765d487c3680a50f5c03572f600"});
-        assert(genesis.hashMerkleRoot == uint256{"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"});
+        //genesis = CreateGenesisBlock(1296688602, 3, 0x207fffff, 1, 50 * COIN); 
+        //consensus.hashGenesisBlock = genesis.GetHash();
+        //assert(consensus.hashGenesisBlock == uint256{"5b7a4494ac602f4ddfbd5fbd180a5d670978b765d487c3680a50f5c03572f600"});
+        //assert(genesis.hashMerkleRoot == uint256{"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"});
 
+        genesis = MineGenesisBlock(1296688602, 0, 0x1d00ffff, 1, 50 * COIN);
 
         vFixedSeeds.clear();
         vSeeds.clear();

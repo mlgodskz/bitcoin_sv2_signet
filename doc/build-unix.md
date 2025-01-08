@@ -10,8 +10,17 @@ To Build
 ```bash
 cmake -B build
 cmake --build build -j 12    # use "-j N" for N parallel jobs
-cmake --install build  # optional
+
+# cmake --install build  # optional
 ```
+```bash
+# rm -rf ~/projects/nomium/TP/tp-pooltest/build
+
+cd ~/projects/nomium/TP/tp-pooltest/build/src
+mkdir pooltestdata1
+./bitcoind -chain=pooltest -datadir=./pooltestdata1 -bind=127.0.0.1 -sv2 -sv2port=8442 -debug=sv2 -loglevel=sv2:trace
+```
+
 
 See below for instructions on how to [install the dependencies on popular Linux
 distributions](#linux-distribution-specific-instructions), or the
